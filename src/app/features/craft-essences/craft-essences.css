@@ -1,0 +1,136 @@
+.ce-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* CE Card Styling */
+.ce-card {
+  background: var(--premium-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.ce-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--accent-glow);
+  border-color: var(--primary-gold);
+}
+
+.ce-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.ce-card img {
+  width: 100%;
+  display: block;
+  transition: var(--transition-smooth);
+}
+
+.ce-card:hover img {
+  transform: scale(1.05);
+}
+
+.ce-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: rgba(0,0,0,0.2);
+}
+
+.ce-rarity {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 0.7rem;
+  text-shadow: 0 1px 2px #000;
+}
+
+.ce-name {
+  padding: 10px 8px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  color: #3498db;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Modal specific tweaks */
+.modal-right {
+  overflow-y: auto;
+  max-height: calc(95vh - 60px);
+}
+
+@media (max-width: 768px) {
+  .ce-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+/* CE Effect Groups */
+.skill-group-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.effects-block {
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.effects-block.mlb {
+  background: rgba(241, 196, 15, 0.03);
+  border-color: rgba(241, 196, 15, 0.2);
+}
+
+.effects-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #34495e;
+  color: #bdc3c7;
+  margin-bottom: 12px;
+}
+
+.effects-badge.mlb-badge {
+  background: #f1c40f;
+  color: #000;
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.2);
+}
+
+.skill-item.mlb-highlight {
+  border-color: rgba(241, 196, 15, 0.15);
+}
+
+.skill-item.mlb-highlight .skill-name {
+  color: #f1c40f;
+}

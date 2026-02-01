@@ -1,0 +1,155 @@
+<div class="container">
+  <h1 class="page-title">Explorador de Craft Essences</h1>
+
+  <div class="filter-section">
+    <div class="filters-row">
+      <div class="filter-item">
+        <label class="filter-label">Nombre</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Buscar..."
+          [value]="searchTerm()"
+          (input)="onSearchChange($event)">
+      </div>
+
+      <div class="filter-item">
+        <label class="filter-label">Rareza</label>
+        <select class="form-control" [value]="selectedRarity()" (change)="onRarityChange($event)">
+          <option value="0">Todas las Rarezas</option>
+          <option *ngFor="let r of rarities" [value]="r">{{ r }} Estrellas</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state text-center py-5">
+      <div class="servant-spinner"></div>
+      <p class="mt-3">Cargando Esencias de Bondad...</p>
+    </div>
+  } @else {
+    <div class="ce-grid">
+      @for (ce of filteredCEs(); track ce.id) {
+        <div class="ce-card" (click)="selectCE(ce)">
+          <div class="ce-image-wrapper">
+            <img [src]="getCEImage(ce)" [alt]="ce.name">
+            <div class="ce-rarity">
+              @for (i of [].constructor(ce.rarity); track $index) {
+                <span>⭐</span>
+              }
+            </div>
+          </div>
+          <p class="ce-name">{{ ce.name }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- CE Details Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="premium-modal high-fidelity" (click)="$event.stopPropagation()">
+        <div class="premium-modal-header">
+          <div class="servant-name-header">{{ selectedCE()?.name }}</div>
+          <div class="header-middle">
+            <div class="rarity-stars">
+              @for (i of [].constructor(selectedCE()?.rarity || 0); track $index) {
+                <span class="star">★</span>
+              }
+            </div>
+          </div>
+          <div class="header-right-actions">
+            <button class="close-btn-premium" (click)="closeModal()">&times;</button>
+          </div>
+        </div>
+
+        <div class="modal-layout">
+          <div class="modal-left">
+            <div class="art-frame">
+              @if (selectedCE(); as ce) {
+                <img [src]="getCEImage(ce, true)" class="character-art-full">
+                <div class="collection-no-overlay"># {{ ce.collectionNo }}</div>
+              }
+            </div>
+
+            <div class="stat-group premium-stats">
+              <h4>STATS</h4>
+              <div class="stat-grid-modern">
+                <div class="stat-box">
+                  <span class="stat-label">ATK MIN</span>
+                  <span class="stat-value">{{ selectedCE()?.atkBase }}</span>
+                </div>
+                <div class="stat-box highlight">
+                  <span class="stat-label">ATK MAX</span>
+                  <span class="stat-value">{{ selectedCE()?.atkMax }}</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">HP MIN</span>
+                  <span class="stat-value">{{ selectedCE()?.hpBase }}</span>
+                </div>
+                <div class="stat-box highlight">
+                  <span class="stat-label">HP MAX</span>
+                  <span class="stat-value">{{ selectedCE()?.hpMax }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-right detailed-info">
+            @if (modalLoading()) {
+              <div class="text-center py-5">
+                <div class="servant-spinner"></div>
+                <p>Obteniendo efectos...</p>
+              </div>
+            } @else {
+              <div class="skills-section">
+                <h4 class="section-title">Efectos de la Esencia</h4>
+                
+                <div class="skill-group-container">
+                  <!-- Base Effects -->
+                  <div class="effects-block">
+                    <div class="effects-badge">Base</div>
+                    <div class="skill-list">
+                      @for (skill of baseSkills; track $index) {
+                        <div class="skill-item">
+                          @if (skill.icon) {
+                            <img [src]="skill.icon" class="skill-icon">
+                          }
+                          <div class="skill-info">
+                            <div class="skill-name">{{ skill.name }}</div>
+                            <div class="skill-detail">{{ getSkillDetail(skill) }}</div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- MLB Effects -->
+                  @if (mlbSkills.length > 0) {
+                    <div class="effects-block mlb">
+                      <div class="effects-badge mlb-badge">Max Limit Break</div>
+                      <div class="skill-list">
+                        @for (skill of mlbSkills; track $index) {
+                          <div class="skill-item mlb-highlight">
+                            @if (skill.icon) {
+                              <img [src]="skill.icon" class="skill-icon">
+                            }
+                            <div class="skill-info">
+                              <div class="skill-name">{{ skill.name }}</div>
+                              <div class="skill-detail">{{ getSkillDetail(skill) }}</div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

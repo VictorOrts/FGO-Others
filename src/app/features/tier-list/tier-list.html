@@ -1,0 +1,342 @@
+<div class="container">
+  <h1 class="page-title">FGO Servant Tier List</h1>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="filters-row">
+      <div class="filter-item">
+        <label class="filter-label">Clase</label>
+        <select class="form-control" (change)="updateFilter($event)">
+          <option value="">Todas</option>
+          <option value="Saber">Saber</option>
+          <option value="Archer">Archer</option>
+          <option value="Lancer">Lancer</option>
+          <option value="Rider">Rider</option>
+          <option value="Caster">Caster</option>
+          <option value="Assassin">Assassin</option>
+          <option value="Berserker">Berserker</option>
+          <option value="Shielder">Shielder</option>
+          <option value="Ruler">Ruler</option>
+          <option value="Avenger">Avenger</option>
+          <option value="MoonCancer">Moon Cancer</option>
+          <option value="Foreigner">Foreigner</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Rareza</label>
+        <select class="form-control" (change)="updateRarityFilter($event)">
+          <option value="">Todas</option>
+          <option value="5">5 ★ (SSR)</option>
+          <option value="4">4 ★ (SR)</option>
+          <option value="3">3 ★ (R)</option>
+          <option value="2">2 ★ (UC)</option>
+          <option value="1">1 ★ (C)</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Nombre</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Buscar..."
+          (input)="updateNameFilter($event)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Assumptions Section Hidden for now
+  <div class="assumptions-section">
+    <div class="assumptions-grid">
+      <div class="assumption-card ssr">
+        <div class="assumption-header">
+          <span class="star-rating">5 ★</span>
+          <h3>5★ Assumptions</h3>
+        </div>
+        <div class="assumption-body">
+          <p>SSR Servants are assumed to be at <strong>NP1, 10/10/10 Skills</strong>. Double Servant compositions are considered.</p>
+          <div class="premium-note">
+            All 5* Servants are excellent! Their performance often vastly outpaces those of lower rarities and each of them is worth investing in. The tier list is therefore just a comparison tool to judge these Servants by their relative performance. The tier placement is primarily based on a Servant’s current performance, and their placement will often shift with future Interludes and Rank Ups, new competition, and the changing state of the game.
+          </div>
+        </div>
+      </div>
+
+      <div class="assumption-card sr">
+        <div class="assumption-header">
+          <span class="star-rating">4 ★</span>
+          <h3>4★ Assumptions</h3>
+        </div>
+        <div class="assumption-body">
+          <p>Non-Welfare SR Servants are assumed to be at <strong>NP1, 10/10/10 Skills</strong>. Welfare SR Servants are assumed to be at <strong>NP5, 10/10/10 Skills</strong>. Double Servant compositions are considered.</p>
+        </div>
+      </div>
+
+      <div class="assumption-card r">
+        <div class="assumption-header">
+          <span class="star-rating">1-3 ★</span>
+          <h3>1-3★ Assumptions</h3>
+        </div>
+        <div class="assumption-body">
+          <p>Non-Story Locked Servants are assumed to be at <strong>NP5, 10/10/10 Skills</strong>. Story-Locked (generally 3 star) Servants are assumed to be at <strong>NP1, 10/10/10 Skills</strong>. Double Servant compositions are considered.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <!-- Loading State -->
+  @if (servants(); as allServants) {
+    <!-- Dynamic Tiers -->
+    @for (rarity of raritiesArr; track rarity) {
+      @if (groupedTiers()[rarity]; as tierServants) {
+        @if (tierServants.length > 0) {
+          <div class="tier-group">
+            <div class="tier-header" 
+                 [style.background]="getHeaderGradient(rarity)">
+              Tier {{ rarity }} Estrellas
+            </div>
+            <div class="tier-content">
+              <div class="servant-grid">
+                @for (servant of tierServants; track servant.id; let i = $index) {
+                  <div class="servant-card"
+                       title="{{ servant.name }}"
+                       [style.animation-delay]="i * 30 + 'ms'"
+                       (click)="selectServant(servant)">
+                    <!-- Tier Grade Hidden from grid view
+                    <div class="tier-grade" *ngIf="servant.tierGrade" [ngClass]="getGradeClass(servant.tierGrade)">
+                      {{ servant.tierGrade }}
+                    </div>
+                    -->
+                    <img [src]="servant.face" [alt]="servant.name" loading="lazy">
+                    <p class="servant-name">{{ servant.name }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      }
+    }
+  } @else {
+    <div class="d-flex justify-content-center align-items-center p-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Cargando...</span>
+      </div>
+      <span class="ml-3 text-muted font-weight-bold">Cargando datos de Servants...</span>
+    </div>
+  }
+
+  <!-- Loading Overlay for Modal -->
+  <div *ngIf="isModalLoading" class="modal-overlay loading-overlay">
+    <button class="close-btn" (click)="closeModal()">&times;</button>
+    <div class="spinner-container">
+      <div class="servant-spinner"></div>
+      <p>Cargando detalles...</p>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="selectedServant" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content-custom premium-modal high-fidelity" (click)="$event.stopPropagation()">
+      <!-- Premium Header -->
+      <div class="premium-modal-header">
+        <div class="header-left">
+          <div class="class-icon-container" style="display: flex; align-items: center; gap: 12px;">
+            <span class="servant-name-header">{{ selectedServant.name }}</span>
+            <span class="modal-tier-badge" *ngIf="selectedServant.tierGrade" [ngClass]="getGradeClass(selectedServant.tierGrade)">
+              Rank {{ selectedServant.tierGrade }}
+            </span>
+          </div>
+        </div>
+        <div class="header-middle">
+           <div class="rarity-stars">
+            <span *ngFor="let star of [].constructor(selectedServant.rarity)" class="star">★</span>
+          </div>
+        </div>
+        <div class="header-right-actions">
+          <button class="close-btn-premium" (click)="closeModal()">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-layout">
+        <!-- Left Side: Character Art & Card Stack -->
+        <div class="modal-left">
+          <div class="art-frame">
+            <img [src]="getAscensionImage()" [alt]="selectedServant.name" class="character-art-full">
+            
+            <!-- Collection No Overlay -->
+            <div class="collection-no-overlay">
+              # {{ selectedServant.collectionNo }}
+            </div>
+          </div>
+          
+          <div class="ascension-grid-controls">
+            <button class="asc-tab-btn" [class.active]="currentAscension === 1" (click)="setAscension(1)">Stage 1</button>
+            <button class="asc-tab-btn" [class.active]="currentAscension === 2" (click)="setAscension(2)">Stage 2</button>
+            <button class="asc-tab-btn" [class.active]="currentAscension === 3" (click)="setAscension(3)">Stage 3</button>
+            <button class="asc-tab-btn" [class.active]="currentAscension === 4" (click)="setAscension(4)">Stage 4</button>
+            <!-- Add specialized buttons if needed, for now just 4 stages -->
+          </div>
+
+          <!-- Attack Stats (Moved here) -->
+          <!-- Attack Stats -->
+          <div class="stat-group premium-stats">
+            <h4>ATTACK</h4>
+            <div class="stat-grid-modern">
+              <div class="stat-box">
+                <span class="stat-label">Base</span>
+                <span class="stat-value">{{ selectedServant.atkBase || '---' }}</span>
+              </div>
+              <div class="stat-box highlight">
+                <span class="stat-label">Max</span>
+                <span class="stat-value">{{ selectedServant.atkMax }}</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Lv 100</span>
+                <span class="stat-value">{{ selectedServant.atkGrowth ? selectedServant.atkGrowth[99] : '---' }}</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Lv 120</span>
+                <span class="stat-value">{{ selectedServant.atkGrowth ? selectedServant.atkGrowth[119] : '---' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- HP Stats -->
+          <div class="stat-group premium-stats">
+            <h4>HP</h4>
+            <div class="stat-grid-modern">
+              <div class="stat-box">
+                <span class="stat-label">Base</span>
+                <span class="stat-value">{{ selectedServant.hpBase || '---' }}</span>
+              </div>
+              <div class="stat-box highlight">
+                <span class="stat-label">Max</span>
+                <span class="stat-value">{{ selectedServant.hpMax }}</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Lv 100</span>
+                <span class="stat-value">{{ selectedServant.hpGrowth ? selectedServant.hpGrowth[99] : '---' }}</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Lv 120</span>
+                <span class="stat-value">{{ selectedServant.hpGrowth ? selectedServant.hpGrowth[119] : '---' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Traits Section (Moved here from right) -->
+          <!-- Traits Section Hidden for now
+          <div class="traits-section-left" *ngIf="getTraitNames().length > 0">
+            <h4>Traits</h4>
+            <div class="traits-list-compact">
+              <span *ngFor="let trait of getTraitNames()" class="trait-badge">{{ trait }}</span>
+            </div>
+          </div>
+          -->
+        </div>
+
+        <!-- Right Side: Detailed Stats -->
+        <div class="modal-right detailed-info">
+          <div class="hit-counts-row">
+            <div class="hit-chip quick">
+              <img [src]="getCardIcon('quick')" alt="Q" class="hit-icon">
+              <span>{{ getHitCount('quick') }}</span>
+            </div>
+            <div class="hit-chip arts">
+              <img [src]="getCardIcon('arts')" alt="A" class="hit-icon">
+              <span>{{ getHitCount('arts') }}</span>
+            </div>
+            <div class="hit-chip buster">
+              <img [src]="getCardIcon('buster')" alt="B" class="hit-icon">
+              <span>{{ getHitCount('buster') }}</span>
+            </div>
+            <div class="hit-chip extra">
+              <span class="extra-label">X</span>
+              <span>{{ getHitCount('extra') }}</span>
+            </div>
+          </div>
+
+          <!-- Basic Data -->
+          <div class="info-section">
+            <div class="info-row">
+              <span class="label">Attribute</span>
+              <span class="value accent">{{ selectedServant.attribute || 'Earth' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Alignments</span>
+              <span class="value">{{ selectedServant.alignments?.join(', ') || 'Neutral' }}</span>
+            </div>
+          </div>
+
+          <!-- Secondary Stats -->
+          <div class="info-section stats-grid-small">
+            <div class="info-row stat-with-icon">
+              <div class="label-group">
+                <img src="/images/NPGainUp.webp" alt="NP Gain" class="stat-icon-mini">
+                <span class="label">NP Gain</span>
+              </div>
+              <span class="value">{{ getNpGain() }}</span> 
+            </div>
+            <div class="info-row stat-with-icon">
+              <div class="label-group">
+                <img src="/images/NPDamageGainUp.webp" alt="NP Defense" class="stat-icon-mini">
+                <span class="label">NP when Attacked</span>
+              </div>
+              <span class="value">{{ getNpAttack() }}</span>
+            </div>
+            <div class="info-row stat-with-icon">
+              <div class="label-group">
+                <img src="/images/StarGatherRateUp.webp" alt="Star Abs" class="stat-icon-mini">
+                <span class="label">Star Absorption</span>
+              </div>
+              <span class="value">{{ getStarAbsorption() }}</span>
+            </div>
+            <div class="info-row stat-with-icon">
+              <div class="label-group">
+                <img src="/images/StarDropRateUp.webp" alt="Star Gen" class="stat-icon-mini">
+                <span class="label">Star Gen per Hit</span>
+              </div>
+              <span class="value">{{ getStarGen() }}</span>
+            </div>
+            <div class="info-row stat-with-icon">
+              <div class="label-group">
+                <img src="/images/DeathRateUp.webp" alt="Death Chance" class="stat-icon-mini">
+                <span class="label">Instant Death Chance</span>
+              </div>
+              <span class="value">{{ getDeathChance() }}</span>
+            </div>
+          </div>
+
+          <!-- Skills Section -->
+          <div class="skills-section" *ngIf="activeSkills.length > 0">
+            <h4 class="modal-section-title">Active Skills</h4>
+            <div class="skill-list">
+              <div *ngFor="let s of activeSkills" class="skill-item">
+                <img [src]="s.icon" class="skill-icon" *ngIf="s.icon">
+                <div class="skill-info">
+                  <div class="skill-name">{{ s.name }}</div>
+                  <div class="skill-detail">{{ s.detail }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Noble Phantasm Section -->
+          <div class="np-section" *ngIf="activeNP">
+            <h4 class="modal-section-title">Noble Phantasm</h4>
+            <div class="np-card">
+              <div class="np-header">
+                <div class="np-card-type" [ngClass]="getNpCardType()">
+                  <img *ngIf="getNpCardImage()" [src]="getNpCardImage()" [alt]="getNpCardType()" class="np-card-img">
+                  <span *ngIf="!getNpCardImage()">{{ npCardInitial }}</span>
+                </div>
+                <div class="np-name">{{ activeNP.name }}</div>
+              </div>
+              <div class="np-detail">{{ activeNP.detail }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

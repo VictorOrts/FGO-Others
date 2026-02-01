@@ -1,0 +1,37 @@
+<main class="main">
+  <div class="content">
+    <header class="app-header">
+      <div class="header-left">
+        <h1>{{ title() }}</h1>
+        <nav class="app-nav">
+          <a routerLink="/tier-list" routerLinkActive="active" class="nav-link">Servants</a>
+          <a routerLink="/craft-essences" routerLinkActive="active" class="nav-link">Craft Essences</a>
+          <a routerLink="/materials" routerLinkActive="active" class="nav-link">Materiales</a>
+          <a routerLink="/command-codes" routerLinkActive="active" class="nav-link">Command Codes</a>
+          <a routerLink="/favorites" routerLinkActive="active" class="nav-link">Favoritos</a>
+        </nav>
+      </div>
+      <button class="theme-toggle" (click)="toggleTheme()" [title]="darkMode() ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'">
+        {{ darkMode() ? '☀️' : '🌙' }}
+      </button>
+    </header>
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <div class="container text-center">
+    <p class="mb-1">&copy; 2026 Victor Orts. Todos los derechos reservados.</p>
+    <p class="small text-muted">
+      Datos proporcionados por <a href="https://api.atlasacademy.io/" target="_blank" rel="noopener noreferrer">Atlas Academy API</a>
+    </p>
+  </div>
+</footer>
+
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
